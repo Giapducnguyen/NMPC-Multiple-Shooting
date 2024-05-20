@@ -90,7 +90,17 @@ g_continuity = [g_continuity;X(:,1) - P(1:n_state,1)];
 
 for k = 1:Np
     % previous control
-    u_km1 = P(2*n_state+1 : 2*n_state + n_control,1);
+    if k == 1
+        u_km1 = P(2*n_state+1 : 2*n_state + n_control,1);
+    elseif k <= Nc
+        du_temp = zeros(n_control,1);
+        for j = 1 : k-1
+            du_temp = du_temp +  Delta_U(:,j);
+        end
+        u_km1 = P(2*n_state+1 : 2*n_state + n_control,1) + du_temp;
+    else
+        u_km1 = P(2*n_state+1 : 2*n_state + n_control,1) + sum(Delta_U,2);
+    end
     % current state
     z_k = X(:,k);
     % current control increment, current slack variables
@@ -274,8 +284,10 @@ figure;
 subplot(211); stairs(t, sc_cl(:,1),'--m','LineWidth',1); hold on; 
 stairs(t, Sc_max(1)*ones(size(t)),'-.k','LineWidth',1); 
 stairs(t, Sc_min(1)*ones(size(t)),'-.k','LineWidth',1);
+title('Slack on $v$','interpreter','latex')
 
 subplot(212); stairs(t, sc_cl(:,2),'--m','LineWidth',1); hold on; 
 stairs(t, Sc_max(2)*ones(size(t)),'-.k','LineWidth',1);
 stairs(t, Sc_min(2)*ones(size(t)),'-.k','LineWidth',1);
 xlabel('Time [s]','interpreter','latex')
+title('Slack on $\omega$','interpreter','latex')
